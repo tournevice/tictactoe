@@ -1,0 +1,216 @@
+<html>
+	<head>
+		<title>Tic-tac-toe</title>
+		<style>
+			#global { width: 500px; }
+			.carre { width: 100px; height: 100px; /*text-align: center;*/ top: 50%; left: 50%; }
+			.bottom { border-bottom: 1px solid black; }
+			.right {  border-right: 1px solid black; }
+			#airedejeu { width: 302px; height: 300px; border: 2px solid black; float: left; }
+			#row1 { width: 302px; height: 100px; border-bottom: 1px solid black; }
+			#row2 { width: 302px; height: 100px; border-bottom: 1px solid black; }
+			#row3 { width: 302px; height: 100px;}
+			#carre1 { float: left;}
+			#carre2 { float: right;}
+			#carre3 { float: right;}
+			#carre4 { float: left; }
+			#carre5 { float: right;}
+			#carre6 { float: right;}
+			#carre7 { float: left; }
+			#carre8 { float: right;}
+			#carre9 { float: right;}
+			#scoreArea { width:106px; height: 200px; /* border: 1px solid red; */ float: right; }
+		</style>
+		
+	</head>
+	<body>
+		<div id="global">
+			<div id="airedejeu">
+				<div id="row1"> 
+					<span id="col1"><div id="carre1" class="carre right col1 diag1"></div></span>
+					<span id="col3"><div id="carre3" class="carre col3 diag2"></div></span>
+					<span id="col2"><div id="carre2" class="carre right col2"></div></span>
+				</div>
+				<div id="row2">
+					<span id="col1"><div id="carre4" class="carre bottom col1 right"></div></span>
+					<span id="col3"><div id="carre6" class="carre bottom col3"></div></span>
+					<span id="col2"><div id="carre5" class="carre bottom col2  diag1 diag2 right"></div></span>
+				</div>
+				<div id="row3">
+					<span id="col1"><div id="carre7" class="carre right col1 diag2"></div></span>
+					<span id="col3"><div id="carre9" class="carre col3 diag1"></div></span>
+					<span id="col2"><div id="carre8" class="carre right col2"></div></span>
+				</div> 
+			</div>
+			<div id="scoreArea">
+				<div>Joueur 1 : <span id="score1"></span></div>
+				<div>Joueur 2 : <span id="score2"></span></div>
+			</div>
+		</div>
+		 <div style="width: 100px; /* border: 1px solid yellow */">
+			<input id="restart" type='button' value='recommencer' />
+		</div>
+		<script>
+		
+		function joueur(image, id) {
+			this.score = -1;
+			this.image = image;
+			this.joueurId = id;
+		}
+		
+		var joueur1 = new joueur('cross.png', 1);	
+		updateScore(joueur1);
+		
+		var joueur2 = new joueur('circle.png', 2);
+		updateScore(joueur2);
+		
+		var currentJoueur = joueur1;
+		
+		function isWinner(el) {
+			var win = checkLine(el);
+			if (!win) {
+				win = checkColumn(el);
+				if (!win) {
+					win = checkDiags(el);
+				}
+			}
+			
+			return win;
+		}
+		
+		function restart() {
+			document.location.reload();
+		}
+				
+		function getParentNodes(parent) {
+			return parent.getElementsByClassName('carre');
+		}
+		
+		function countChecked(elems) {
+			var counter = 0;
+			
+			for (var i = 0; i < elems.length; i++) {
+				var lineEl = elems[i];
+				var imgNameToCheck = lineEl.innerHTML.match(new RegExp('[a-zA-Z]+.png', 'gi'));
+				if (imgNameToCheck != null && imgNameToCheck.length > 0) {
+					if (imgNameToCheck[0] == currentJoueur.image) {
+					  counter++;
+					}
+				}
+			}
+			
+			return counter;
+		}
+		
+		function countOk(counter) {
+			return counter == 3;
+		}
+		
+		function checkLine(el) {
+			var lineElems = getParentNodes(el.parentNode.parentNode);
+			var counter = countChecked(lineElems);
+			return countOk(counter);
+		}
+		
+		function checkColumn(el) {
+			var colToCheck = el.className.match(new RegExp("col[0-9]+", "gi"));
+			var colName = '';
+			if (colToCheck.length > 0) {
+				colName = colToCheck[0];
+			}
+			
+			return elementsOk(colName);
+		}
+		
+		function checkDiags(el) {
+			var counter = 0;
+			var diagsOk = false;
+			var diagToCheck = el.className.match(new RegExp("diag[0-9]+", "gi"));
+			if (diagToCheck != null && diagToCheck.length > 0) {
+				var diagName = diagToCheck[0];
+				diagsOk = elementsOk(diagName);
+				if (!diagsOk) {
+					if (diagToCheck.length > 1) {
+						diagName = diagToCheck[1];
+						diagsOk = elementsOk(diagName);
+					}
+				}
+			}
+			
+			return diagsOk;
+		}
+		
+		function elementsOk(className) {
+			var elems = getElementsByClassName(className);
+			
+			var counter = countChecked(elems);
+			return countOk(counter);
+		}
+		
+		function getElementsByClassName(className) {
+			return document.querySelectorAll('.' + className);
+		}
+		
+		function allSquareFilled() {
+			var emptySquare = false;
+			var squares = getElementsByClassName('carre');
+			for (var i = 0; i < squares.length; i++) {
+				if (0 === squares[i].innerHTML.length) {
+					emptySquare = true;
+				}
+			}
+			return !emptySquare;
+		}
+		
+		function updateScore(joueur) {
+			joueur.score += 1;
+			var scoreSpan = document.getElementById('score' + joueur.joueurId);
+			scoreSpan.innerHTML = joueur.score;
+		}
+		
+		function clearSquare() {
+			var squares = getElementsByClassName('carre');
+			for (var i = 0; i < squares.length; i++) {
+				squares[i].innerHTML = "";
+			}
+		}
+		
+		function handleClick(e) {
+			var currentElem = e.srcElement;
+			if (currentElem.innerHTML == '') {
+				currentElem.innerHTML = '<img src=' + currentJoueur.image + '></img>';
+				
+				var win = isWinner(currentElem);
+					
+				if (win) {
+					alert('Gagné!');
+					updateScore(currentJoueur);
+					clearSquare();
+				}
+				else {	
+					var squaresFilled = allSquareFilled();
+					if (squaresFilled) {
+						alert('aucun gagnant');
+						clearSquare();
+					}
+					else {
+						if (currentJoueur == joueur1) {
+							currentJoueur = joueur2;
+						}
+						else {
+							currentJoueur = joueur1;
+						}
+					}
+				}
+			}
+		}
+
+		var cols = document.querySelectorAll('.carre');
+		[].forEach.call(cols, function(col) {
+		  col.addEventListener('click', handleClick, false);
+		});
+		
+		document.getElementById('restart').addEventListener('click', restart, false);
+		</script>
+	</body>
+</html>
